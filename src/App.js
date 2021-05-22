@@ -3,7 +3,6 @@ import './App.css';
 import Layout from './components/layout';
 import connectAPI from './utils/api_endpoints';
 import MerchantsTable from './components/merchantsTable';
-import {Box, Button, Typography} from '@material-ui/core';
 import AllSelectedMerchants from './allSelectedMerchants';
 import LoaderErrorComponent from './components/loaderErrorComponent';
 
@@ -30,6 +29,10 @@ function App() {
 
   useEffect(() => {
     callAPI();
+
+    window.addEventListener('beforeunload', function() {
+      window.localStorage.removeItem('usersArray');
+    });
   },[]);
 
   return(
@@ -37,7 +40,7 @@ function App() {
       <Switch>
 
         <Route path="/allSelectedMerchants">
-          <Layout>
+          <Layout title="Specific Merchants Data" >
             {
               merchantsData &&
               <AllSelectedMerchants merchantsData={merchantsData} />
