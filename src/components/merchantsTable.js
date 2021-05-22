@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, Paper, Box, Typography, Switch, FormControlLabel} from '@material-ui/core';
+import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, TablePagination, Paper, Box, Typography, Switch, FormControlLabel} from '@material-ui/core';
 import {withStyles, makeStyles} from '@material-ui/core/styles';
 import {tableHeaderConstants} from '../utils/constants';
 import moment from 'moment';
@@ -43,6 +43,17 @@ const MerchantsTable = (props) => {
   const [maxBidsArr, setMaxBidsArr]       = useState(null);
   const [minBidsArr, setMinBidsArr]       = useState(null);
   const [sortSwitch, setSortSwitch]       = useState(false);
+  const [rowsPerPage, setRowsPerPage]     = useState(4);
+  const [page, setPage]                   = useState(0);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const onSortSwitchChange = (e) => {
     setSortSwitch(e.target.checked);
@@ -129,7 +140,8 @@ const MerchantsTable = (props) => {
           <TableHead>
             <TableRow>
               {
-                tableHeaderConstants.map((header, index) => (
+                tableHeaderConstants
+                .map((header, index) => (
                   <StyledTableCell key={`header-${index}`} >
                     {header}
                     {
@@ -155,7 +167,9 @@ const MerchantsTable = (props) => {
 
           <TableBody>
             {
-              merchantsData.map((data, index) => (
+              merchantsData
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((data, index) => (
                 <StyledTableRow key={`row-${index}`} >
 
                   <StyledTableCell>
@@ -207,6 +221,15 @@ const MerchantsTable = (props) => {
             }
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          rowsPerPageOptions={[]}
+          count={merchantsData.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </React.Fragment>
   )
