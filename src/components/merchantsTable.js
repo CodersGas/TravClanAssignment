@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
-    backgroundColor: '#e0f7fa',
+    backgroundColor: '#26c6da',
     color: '#000',
   },
   body: {
@@ -19,7 +19,7 @@ const StyledTableCell = withStyles((theme) => ({
 const StyledTableRow = withStyles((theme) => ({
   root: {
     '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: '#fff',
     },
   },
 }))(TableRow);
@@ -31,6 +31,14 @@ const useStyles = makeStyles({
   labelText: {
     color: '#757575',
     fontSize: '14px'
+  },
+  tableContainer: {
+    boxShadow: '0 1px 7px 0 #e8e8e8'
+  },
+  custName: {
+    color: '#26c6da',
+    fontSize: 16,
+    fontWeight: 500
   }
 });
 
@@ -135,7 +143,7 @@ const MerchantsTable = (props) => {
           />
         </Box>
       }
-      <TableContainer component={Paper} >
+      <TableContainer component={Paper} className={classes.tableContainer} >
         <Table className={classes.table} >
           <TableHead>
             <TableRow>
@@ -173,7 +181,7 @@ const MerchantsTable = (props) => {
                 <StyledTableRow key={`row-${index}`} >
 
                   <StyledTableCell>
-                    {data.firstname + " " + data.lastname}
+                    <span className={classes.custName} >{data.firstname + " " + data.lastname}</span>
                     {/* Add avatar */}
                   </StyledTableCell>
 

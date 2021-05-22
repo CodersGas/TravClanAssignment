@@ -3,15 +3,19 @@ import './App.css';
 import Layout from './components/layout';
 import connectAPI from './utils/api_endpoints';
 import MerchantsTable from './components/merchantsTable';
-import {Grid} from '@material-ui/core';
+import {Grid, Box} from '@material-ui/core';
 
 function App() {
 
   const [merchantsData, setMerchantsData] = useState(null);
 
   const callAPI = async() => {
-    let response =  await connectAPI('getUsersList');
-    setMerchantsData(response); 
+    try{
+      let response =  await connectAPI('getUsersList');
+      setMerchantsData(response); 
+    }catch(err) {
+      console.log('err while fetching merchants data -> ', err);
+    }
   }
 
   useEffect(() => {
@@ -28,6 +32,17 @@ function App() {
               <MerchantsTable 
                 merchantsData={merchantsData}
               />
+            }
+
+            {
+              !merchantsData &&
+              <Box display='flex' my={2} justifyContent='center' >
+                <img 
+                  src={'./doubleRingLoader.gif'}
+                  width="56px"
+                  height="56px"
+                />
+              </Box>
             }
           </Grid>
         </Grid>
