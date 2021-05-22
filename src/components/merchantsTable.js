@@ -4,6 +4,7 @@ import {withStyles, makeStyles} from '@material-ui/core/styles';
 import {tableHeaderConstants} from '../utils/constants';
 import moment from 'moment';
 import {getMaximumValueId, createMaxAndMinBidArrays} from '../utils/helper';
+import _ from 'lodash';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -34,22 +35,53 @@ const useStyles = makeStyles({
 });
 
 const MerchantsTable = (props) => {
-  
-  const {merchantsData} = props;
   const classes = useStyles();
 
+  const [merchantsData, setMerchantsData] = useState(props.merchantsData);
   const [switchChecked, setSwitchChecked] = useState(true);
   const [switchLabel, setSwitchLabel]     = useState('MAX'); 
-  const [maxBidsArr, setMaxBidsArr]   = useState(null);
+  const [maxBidsArr, setMaxBidsArr]       = useState(null);
   const [minBidsArr, setMinBidsArr]       = useState(null);
+  const [sortSwitch, setSortSwitch]       = useState(false);
+
+  const onSortSwitchChange = (e) => {
+    setSortSwitch(e.target.checked);
+
+    if(e.target.checked) {
+      let sorted = [...merchantsData].sort((a, b) => (b.bids.length && a.bids.length) ? b.bids[0].amount - a.bids[0].amount : null);
+      setMerchantsData([...sorted])
+    }else {
+      let originalMerchantsData = props.merchantsData;
+
+      originalMerchantsData.map((data, index) => {
+        data.bids = maxBidsArr[index];
+      });
+      setMerchantsData(originalMerchantsData);
+    }
+  }
 
   const onSwitchStateChange = (e) => {
-    setSwitchChecked(e.target.checked)
+    setSwitchChecked(e.target.checked);
+    setSortSwitch(false);
 
     if(e.target.checked) {
       setSwitchLabel('MAX');
+      let merchantsDataCopy = [...props.merchantsData];
+
+      merchantsDataCopy.map((data, index) => {
+        data.bids = maxBidsArr[index];
+      });
+
+      setMerchantsData(merchantsDataCopy);
     }else {
       setSwitchLabel('MIN');
+      let merchantsDataCopy = [...props.merchantsData];
+
+      merchantsDataCopy.map((data, index) => {
+        data.bids = minBidsArr[index];
+      });
+
+      setMerchantsData(merchantsDataCopy);
     }
   }
 
@@ -65,119 +97,118 @@ const MerchantsTable = (props) => {
     setMaxBidsArr(maxBidArray);
     setMinBidsArr(minBidArray);
 
+    let merchantsDataCopy = [...merchantsData];
+
+    merchantsDataCopy.map((data, index) => {
+      data.bids = maxBidArray[index];
+    });
+
+    setMerchantsData(merchantsDataCopy);
+
   }, []);
 
   return(
-    <TableContainer component={Paper} >
-      <Table className={classes.table} >
-        <TableHead>
-          <TableRow>
+    <React.Fragment>
+      {
+        switchChecked &&
+        <Box width={1} mt={1} >
+          <FormControlLabel 
+            label="Sort Data"
+            control={
+              <Switch 
+                checked={sortSwitch}
+                onChange={onSortSwitchChange}
+                color='primary'
+              />
+            }
+          />
+        </Box>
+      }
+      <TableContainer component={Paper} >
+        <Table className={classes.table} >
+          <TableHead>
+            <TableRow>
+              {
+                tableHeaderConstants.map((header, index) => (
+                  <StyledTableCell key={`header-${index}`} >
+                    {header}
+                    {
+                      header === 'Bids' &&
+                      <Box width={1} mt={1} >
+                        <FormControlLabel 
+                          label={switchLabel}
+                          control={
+                            <Switch 
+                              checked={switchChecked}
+                              onChange={onSwitchStateChange}
+                              color='primary'
+                            />
+                          }
+                        />
+                      </Box>
+                    }
+                  </StyledTableCell>
+                ))
+              }
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
             {
-              tableHeaderConstants.map((header, index) => (
-                <StyledTableCell key={`header-${index}`} >
-                  {header}
-                  {
-                    header === 'Bids' &&
-                    <Box width={1} mt={1} >
-                      <FormControlLabel 
-                        label={switchLabel}
-                        control={
-                          <Switch 
-                            checked={switchChecked}
-                            onChange={onSwitchStateChange}
-                            color='primary'
-                          />
-                        }
-                      />
-                    </Box>
-                  }
-                </StyledTableCell>
+              merchantsData.map((data, index) => (
+                <StyledTableRow key={`row-${index}`} >
+
+                  <StyledTableCell>
+                    {data.firstname + " " + data.lastname}
+                    {/* Add avatar */}
+                  </StyledTableCell>
+
+                  <StyledTableCell>
+                    {data.email}
+                  </StyledTableCell>
+
+                  <StyledTableCell>
+                    {data.phone}
+                  </StyledTableCell>
+
+                  <StyledTableCell>
+                    {data.premium} 
+                    {/* Add Icon for premium */}
+                  </StyledTableCell>
+
+                  <StyledTableCell>
+                    {
+                      data.bids.map((bid) => (
+                        <Box my={1} display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} >
+                          <Box>
+                            <Typography>
+                              <span className={classes.labelText} >Title : </span>  {bid.carTitle}
+                            </Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography>
+                              <span className={classes.labelText} >Amount : </span> {bid.amount}
+                            </Typography>
+                          </Box>
+
+                          <Box>
+                            <Typography>
+                              <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))
+                    }
+                  </StyledTableCell>
+
+                </StyledTableRow>
               ))
             }
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {
-            merchantsData.map((data, index) => (
-              <StyledTableRow key={`row-${index}`} >
-
-                <StyledTableCell>
-                  {data.firstname + " " + data.lastname}
-                  {/* Add avatar */}
-                </StyledTableCell>
-
-                <StyledTableCell>
-                  {data.email}
-                </StyledTableCell>
-
-                <StyledTableCell>
-                  {data.phone}
-                </StyledTableCell>
-
-                <StyledTableCell>
-                  {data.premium} 
-                  {/* Add Icon for premium */}
-                </StyledTableCell>
-
-                <StyledTableCell>
-                  {
-                    (switchChecked && maxBidsArr) &&
-                    maxBidsArr[index].map((bid) => (
-                      <Box display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} >
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Title : </span>  {bid.carTitle}
-                          </Typography>
-                        </Box>
-
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Amount : </span> {bid.amount}
-                          </Typography>
-                        </Box>
-
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))
-                  }
-
-                  {
-                    !switchChecked &&
-                    minBidsArr[index].map((bid) => (
-                      <Box my={1} display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} borderBottom='1px dotted #000' >
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Title : </span>  {bid.carTitle}
-                          </Typography>
-                        </Box>
-
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Amount : </span> {bid.amount}
-                          </Typography>
-                        </Box>
-
-                        <Box>
-                          <Typography>
-                            <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))
-                  }
-                </StyledTableCell>
-
-              </StyledTableRow>
-            ))
-          }
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </React.Fragment>
   )
 }
 
