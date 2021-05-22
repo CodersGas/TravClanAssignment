@@ -5,6 +5,7 @@ import connectAPI from './utils/api_endpoints';
 import MerchantsTable from './components/merchantsTable';
 import {Box, Button, Typography} from '@material-ui/core';
 import AllSelectedMerchants from './allSelectedMerchants';
+import LoaderErrorComponent from './components/loaderErrorComponent';
 
 import {
   BrowserRouter as Router,
@@ -52,36 +53,14 @@ function App() {
                 merchantsData={merchantsData}
               />
             }
-
-            {
-              !merchantsData && !err &&
-              <Box display='flex' my={2} justifyContent='center' >
-                <img 
-                  src={'./doubleRingLoader.gif'}
-                  width="56px"
-                  height="56px"
-                />
-              </Box>
-            }
-
-            {
-              err &&
-              <Box width={1} display='flex' justifyContent='center' alignItems='center' flexDirection='column'>
-                <Typography>
-                  Oops! Something went wrong. Please try again
-                </Typography>
-
-                <Box my={2} >
-                  <Button onClick={callAPI} variant="outlined" color='primary' >
-                    Retry
-                  </Button>
-                </Box>
-              </Box>
-            }
           </Layout>
         </Route>
-
       </Switch>
+      <LoaderErrorComponent 
+        merchantsData={merchantsData}
+        callAPI={callAPI}
+        err={err}
+      />
     </Router>
   )
 }
