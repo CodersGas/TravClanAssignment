@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, Paper, Box, Typography, Switch, FormControlLabel} from '@material-ui/core';
 import {withStyles, makeStyles} from '@material-ui/core/styles';
 import {tableHeaderConstants} from '../utils/constants';
 import moment from 'moment';
+import {getMaximumValueId, createMaxAndMinBidArrays} from '../utils/helper';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -39,6 +40,8 @@ const MerchantsTable = (props) => {
 
   const [switchChecked, setSwitchChecked] = useState(true);
   const [switchLabel, setSwitchLabel]     = useState('MAX'); 
+  const [maxBidsArr, setMaxBidsArr]   = useState(null);
+  const [minBidsArr, setMinBidsArr]       = useState(null);
 
   const onSwitchStateChange = (e) => {
     setSwitchChecked(e.target.checked)
@@ -49,6 +52,20 @@ const MerchantsTable = (props) => {
       setSwitchLabel('MIN');
     }
   }
+
+  useEffect(() => {
+    let maxIndexIdsArr = [];
+
+    merchantsData.forEach((data) => {
+      let index = getMaximumValueId(data.bids);
+      maxIndexIdsArr.push(index);
+    });
+
+    let {maxBidArray, minBidArray} = createMaxAndMinBidArrays(merchantsData, maxIndexIdsArr);
+    setMaxBidsArr(maxBidArray);
+    setMinBidsArr(minBidArray);
+
+  }, []);
 
   return(
     <TableContainer component={Paper} >
@@ -86,7 +103,7 @@ const MerchantsTable = (props) => {
               <StyledTableRow key={`row-${index}`} >
 
                 <StyledTableCell>
-                  {data.firstname + data.lastname}
+                  {data.firstname + " " + data.lastname}
                   {/* Add avatar */}
                 </StyledTableCell>
 
@@ -105,8 +122,34 @@ const MerchantsTable = (props) => {
 
                 <StyledTableCell>
                   {
-                    data.bids.map((bid, index) => (
-                      <Box display='flex' flexDirection='column' width={1} key={`bid-${index}`} border='1px solid dotted' >
+                    (switchChecked && maxBidsArr) &&
+                    maxBidsArr[index].map((bid) => (
+                      <Box display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} >
+                        <Box>
+                          <Typography>
+                            <span className={classes.labelText} >Title : </span>  {bid.carTitle}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography>
+                            <span className={classes.labelText} >Amount : </span> {bid.amount}
+                          </Typography>
+                        </Box>
+
+                        <Box>
+                          <Typography>
+                            <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))
+                  }
+
+                  {
+                    !switchChecked &&
+                    minBidsArr[index].map((bid) => (
+                      <Box my={1} display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} borderBottom='1px dotted #000' >
                         <Box>
                           <Typography>
                             <span className={classes.labelText} >Title : </span>  {bid.carTitle}
