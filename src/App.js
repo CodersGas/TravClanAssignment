@@ -3,7 +3,14 @@ import './App.css';
 import Layout from './components/layout';
 import connectAPI from './utils/api_endpoints';
 import MerchantsTable from './components/merchantsTable';
-import {Grid, Box, Button, Typography} from '@material-ui/core';
+import {Box, Button, Typography} from '@material-ui/core';
+import AllSelectedMerchants from './allSelectedMerchants';
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from "react-router-dom";
 
 function App() {
 
@@ -24,11 +31,21 @@ function App() {
     callAPI();
   },[]);
 
-  return (
-    <Layout title="Merchants List" >
-      <div className="App">
-        <Grid container justify='center' alignItems='center' >
-          <Grid item md={10} xs={12} sm={12} >
+  return(
+    <Router>
+      <Switch>
+
+        <Route path="/allSelectedMerchants">
+          <Layout>
+            {
+              merchantsData &&
+              <AllSelectedMerchants merchantsData={merchantsData} />
+            }
+          </Layout>
+        </Route>
+    
+        <Route path="/">
+          <Layout title="Merchants Data" >
             {
               !err && merchantsData &&
               <MerchantsTable 
@@ -61,12 +78,12 @@ function App() {
                 </Box>
               </Box>
             }
-          </Grid>
-        </Grid>
-        {/* Add Loader */}
-      </div>
-    </Layout>
-  );
+          </Layout>
+        </Route>
+
+      </Switch>
+    </Router>
+  )
 }
 
 export default App;

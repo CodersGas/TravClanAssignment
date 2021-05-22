@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, TablePagination, Paper, Box, Typography, Switch, FormControlLabel, Checkbox, Avatar} from '@material-ui/core';
+import {Grid,Table, TableBody, TableContainer, TableCell, TableHead, TableRow, TablePagination, Paper, Box, Typography, Switch, FormControlLabel, Checkbox, Avatar, Button} from '@material-ui/core';
 import {withStyles, makeStyles} from '@material-ui/core/styles';
 import {tableHeaderConstants} from '../utils/constants';
 import moment from 'moment';
@@ -48,17 +48,127 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+const TableRowComponent = (props) => {
+  const {data, index, updateCheckedCount} = props;
+  const classes = useStyles();
+
+  const [checkedState, setCheckedState] = useState(false);
+
+  const onCheckStateChange = (e, id) => {
+    setCheckedState(e.target.checked);
+
+    if(e.target.checked) {
+      updateCheckedCount('add', id);
+    }else {
+      updateCheckedCount('sub', id);
+    }
+  }
+
+  return(
+    <StyledTableRow key={`row-${index}`} >
+      <StyledTableCell>
+        <Box width={1} mt={1} >
+          <FormControlLabel 
+            control={
+              <Checkbox 
+                checked={checkedState}
+                onChange={(e) => onCheckStateChange(e, data.id)}
+                color='primary'
+              />
+            }
+          />
+        </Box>
+      </StyledTableCell>
+      <StyledTableCell>
+        <Box
+          display='flex'
+          alignItems='center'
+        > 
+          <Avatar 
+            src={data.avatarUrl}
+            alt={data.firstname + " " + data.lastname}
+            className={classes.avatar}
+          />
+          <span className={classes.custName} >{data.firstname + " " + data.lastname}</span>
+        </Box>
+      </StyledTableCell>
+
+      <StyledTableCell>
+        {data.email}
+      </StyledTableCell>
+
+      <StyledTableCell>
+        {data.phone}
+      </StyledTableCell>
+
+      <StyledTableCell>
+        {
+          data.hasPremium &&
+          <StarIcon style={{color: '#ffd600'}} />
+        }
+      </StyledTableCell>
+
+      <StyledTableCell>
+        {
+          data.bids.map((bid) => (
+            <Box my={1} display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} >
+              <Box>
+                <Typography>
+                  <span className={classes.labelText} >Title : </span>  {bid.carTitle}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography>
+                  <span className={classes.labelText} >Amount : </span> {bid.amount}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography>
+                  <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
+                </Typography>
+              </Box>
+            </Box>
+          ))
+        }
+      </StyledTableCell>
+
+    </StyledTableRow>
+  )
+}
+
 const MerchantsTable = (props) => {
   const classes = useStyles();
 
-  const [merchantsData, setMerchantsData] = useState(props.merchantsData);
-  const [switchChecked, setSwitchChecked] = useState(true);
-  const [switchLabel, setSwitchLabel]     = useState('MAX'); 
-  const [maxBidsArr, setMaxBidsArr]       = useState(null);
-  const [minBidsArr, setMinBidsArr]       = useState(null);
-  const [sortSwitch, setSortSwitch]       = useState(false);
-  const [rowsPerPage, setRowsPerPage]     = useState(4);
-  const [page, setPage]                   = useState(0);
+  const [merchantsData, setMerchantsData]     = useState(props.merchantsData);
+  const [switchChecked, setSwitchChecked]     = useState(true);
+  const [switchLabel, setSwitchLabel]         = useState('MAX'); 
+  const [maxBidsArr, setMaxBidsArr]           = useState(null);
+  const [minBidsArr, setMinBidsArr]           = useState(null);
+  const [sortSwitch, setSortSwitch]           = useState(false);
+  const [rowsPerPage, setRowsPerPage]         = useState(4);
+  const [page, setPage]                       = useState(0);
+  const [checkedCount, setCheckedCount]       = useState(0);
+  const [checkedUsersIds, setCheckedUsersIds] = useState([]);
+
+  const updateCheckedCount = (type, id) => {
+    let userIds = [...checkedUsersIds];
+    if(type == 'add') {
+      setCheckedCount(checkedCount + 1);
+      userIds.push(id);
+    }else {
+      setCheckedCount(checkedCount - 1);
+      userIds = userIds.filter((thisId) => thisId !== id);
+    }
+
+    setCheckedUsersIds([...userIds]);
+  }
+
+  const onViewClick = () => {
+    window.localStorage.setItem('usersArray', JSON.stringify(checkedUsersIds));
+    window.open('./allSelectedMerchants', '_blank');
+  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -133,130 +243,84 @@ const MerchantsTable = (props) => {
   }, []);
 
   return(
-    <React.Fragment>
-      {
-        switchChecked &&
-        <Box width={1} mt={1} >
-          <FormControlLabel 
-            label="Sort Data"
-            control={
-              <Switch 
-                checked={sortSwitch}
-                onChange={onSortSwitchChange}
-                color='primary'
+    <Grid container justify='center' > 
+      <Grid item md={10} xs={12} sm={12} >
+        {
+          <Box width={1} my={1} display='flex' alignItems='center' justifyContent='space-between' >
+            {
+              switchChecked &&
+              <FormControlLabel 
+                label="Sort Data"
+                control={
+                  <Switch 
+                    checked={sortSwitch}
+                    onChange={onSortSwitchChange}
+                    color='primary'
+                  />
+                }
               />
             }
-          />
-        </Box>
-      }
-      <TableContainer component={Paper} className={classes.tableContainer} >
-        <Table className={classes.table} >
-          <TableHead>
-            <TableRow>
+
+            {
+              checkedCount > 0 &&
+              <Button variant='contained' disableElevation color='primary' onClick={onViewClick} >
+                View
+              </Button>
+            }
+          </Box>
+        }
+        <TableContainer component={Paper} className={classes.tableContainer} >
+          <Table className={classes.table} >
+            <TableHead>
+              <TableRow>
+                {
+                  tableHeaderConstants
+                  .map((header, index) => (
+                    <StyledTableCell key={`header-${index}`} >
+                      {header}
+                      {
+                        header === 'Bids' &&
+                        <Box width={1} mt={1} >
+                          <FormControlLabel 
+                            label={switchLabel}
+                            control={
+                              <Switch 
+                                checked={switchChecked}
+                                onChange={onSwitchStateChange}
+                                color='primary'
+                              />
+                            }
+                          />
+                        </Box>
+                      }
+                    </StyledTableCell>
+                  ))
+                }
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
               {
-                tableHeaderConstants
-                .map((header, index) => (
-                  <StyledTableCell key={`header-${index}`} >
-                    {header}
-                    {
-                      header === 'Bids' &&
-                      <Box width={1} mt={1} >
-                        <FormControlLabel 
-                          label={switchLabel}
-                          control={
-                            <Switch 
-                              checked={switchChecked}
-                              onChange={onSwitchStateChange}
-                              color='primary'
-                            />
-                          }
-                        />
-                      </Box>
-                    }
-                  </StyledTableCell>
+                merchantsData
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((data, index) => (
+                  <TableRowComponent data={data} key={index} index={index} updateCheckedCount={updateCheckedCount} />
                 ))
               }
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {
-              merchantsData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((data, index) => (
-                <StyledTableRow key={`row-${index}`} >
-
-                  <StyledTableCell>
-                    <Box
-                      display='flex'
-                      alignItems='center'
-                    > 
-                      <Avatar 
-                        src={data.avatarUrl}
-                        alt={data.firstname + " " + data.lastname}
-                        className={classes.avatar}
-                      />
-                      <span className={classes.custName} >{data.firstname + " " + data.lastname}</span>
-                    </Box>
-                  </StyledTableCell>
-
-                  <StyledTableCell>
-                    {data.email}
-                  </StyledTableCell>
-
-                  <StyledTableCell>
-                    {data.phone}
-                  </StyledTableCell>
-
-                  <StyledTableCell>
-                    {
-                      data.hasPremium &&
-                      <StarIcon style={{color: '#ffd600'}} />
-                    }
-                  </StyledTableCell>
-
-                  <StyledTableCell>
-                    {
-                      data.bids.map((bid) => (
-                        <Box my={1} display='flex' flexDirection='column' width={1} key={`bid-${bid.id}`} >
-                          <Box>
-                            <Typography>
-                              <span className={classes.labelText} >Title : </span>  {bid.carTitle}
-                            </Typography>
-                          </Box>
-
-                          <Box>
-                            <Typography>
-                              <span className={classes.labelText} >Amount : </span> {bid.amount}
-                            </Typography>
-                          </Box>
-
-                          <Box>
-                            <Typography>
-                              <span className={classes.labelText} >Created At : </span> {moment(parseInt(bid.created)).format('DD MMM, YYYY')}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      ))
-                    }
-                  </StyledTableCell>
-
-                </StyledTableRow>
-              ))
-            }
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          rowsPerPageOptions={[]}
-          count={merchantsData.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </TableContainer>
-    </React.Fragment>
+            </TableBody>
+          </Table>
+          <TablePagination
+            component="div"
+            rowsPerPageOptions={[]}
+            count={merchantsData.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+          />
+        </TableContainer>
+      </Grid>
+    </Grid>
   )
 }
 

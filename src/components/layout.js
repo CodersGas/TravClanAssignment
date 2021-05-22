@@ -8,7 +8,10 @@ const Layout = ({children, title}) => {
   return(
     <React.Fragment>
       <NavBar />
-      <PageTitle title={title} />
+      {
+        title &&
+        <PageTitle title={title} />
+      }
       {children}
     </React.Fragment>
   )
