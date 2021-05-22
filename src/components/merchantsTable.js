@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, TablePagination, Paper, Box, Typography, Switch, FormControlLabel} from '@material-ui/core';
+import {Table, TableBody, TableContainer, TableCell, TableHead, TableRow, TablePagination, Paper, Box, Typography, Switch, FormControlLabel, Checkbox, Avatar} from '@material-ui/core';
 import {withStyles, makeStyles} from '@material-ui/core/styles';
 import {tableHeaderConstants} from '../utils/constants';
 import moment from 'moment';
 import {getMaximumValueId, createMaxAndMinBidArrays} from '../utils/helper';
-import _ from 'lodash';
+import StarIcon from '@material-ui/icons/Star';
+import '../App.css';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -24,7 +25,7 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   table: {
     minWidth: 700,
   },
@@ -39,8 +40,13 @@ const useStyles = makeStyles({
     color: '#26c6da',
     fontSize: 16,
     fontWeight: 500
+  },
+  avatar: {
+    width: theme.spacing(6),
+    height: theme.spacing(6),
+    marginRight: 8
   }
-});
+}));
 
 const MerchantsTable = (props) => {
   const classes = useStyles();
@@ -181,8 +187,17 @@ const MerchantsTable = (props) => {
                 <StyledTableRow key={`row-${index}`} >
 
                   <StyledTableCell>
-                    <span className={classes.custName} >{data.firstname + " " + data.lastname}</span>
-                    {/* Add avatar */}
+                    <Box
+                      display='flex'
+                      alignItems='center'
+                    > 
+                      <Avatar 
+                        src={data.avatarUrl}
+                        alt={data.firstname + " " + data.lastname}
+                        className={classes.avatar}
+                      />
+                      <span className={classes.custName} >{data.firstname + " " + data.lastname}</span>
+                    </Box>
                   </StyledTableCell>
 
                   <StyledTableCell>
@@ -194,8 +209,10 @@ const MerchantsTable = (props) => {
                   </StyledTableCell>
 
                   <StyledTableCell>
-                    {data.premium} 
-                    {/* Add Icon for premium */}
+                    {
+                      data.hasPremium &&
+                      <StarIcon style={{color: '#ffd600'}} />
+                    }
                   </StyledTableCell>
 
                   <StyledTableCell>
