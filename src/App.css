@@ -1,3 +1,7 @@
 .toolbar {
   justify-content: space-between;
 }
+
+.pageTitleContainer {
+  margin: 16px 0;
+}
