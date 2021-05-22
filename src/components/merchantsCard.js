@@ -1,7 +1,8 @@
 import React from 'react';
-import {Paper, Box, Typography, Avatar, Grid} from '@material-ui/core';
+import {Box, Typography, Avatar} from '@material-ui/core';
 import {makeStyles} from '@material-ui/core/styles';
 import StarIcon from '@material-ui/icons/Star';
+import {currencySymbol} from '../utils/helper';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -72,7 +73,7 @@ const MerchantsCard = (props) => {
               </Typography>
 
               <Typography>
-                {bid.amount}
+                {currencySymbol('INR')} {bid.amount}
               </Typography>
             </Box>
           ))

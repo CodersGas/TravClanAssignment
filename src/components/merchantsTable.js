@@ -6,6 +6,7 @@ import moment from 'moment';
 import {getMaximumValueId, createMaxAndMinBidArrays} from '../utils/helper';
 import StarIcon from '@material-ui/icons/Star';
 import '../App.css';
+import {currencySymbol} from '../utils/helper';
 
 const StyledTableCell = withStyles((theme) => ({
   head: {
@@ -120,7 +121,7 @@ const TableRowComponent = (props) => {
 
               <Box>
                 <Typography>
-                  <span className={classes.labelText} >Amount : </span> {bid.amount}
+                  <span className={classes.labelText} >Amount : </span> {currencySymbol('INR')} {bid.amount}
                 </Typography>
               </Box>
 
@@ -154,7 +155,7 @@ const MerchantsTable = (props) => {
 
   const updateCheckedCount = (type, id) => {
     let userIds = [...checkedUsersIds];
-    if(type == 'add') {
+    if(type === 'add') {
       setCheckedCount(checkedCount + 1);
       userIds.push(id);
     }else {
@@ -188,7 +189,7 @@ const MerchantsTable = (props) => {
     }else {
       let originalMerchantsData = props.merchantsData;
 
-      originalMerchantsData.map((data, index) => {
+      originalMerchantsData.forEach((data, index) => {
         data.bids = maxBidsArr[index];
       });
       setMerchantsData(originalMerchantsData);
@@ -203,7 +204,7 @@ const MerchantsTable = (props) => {
       setSwitchLabel('MAX');
       let merchantsDataCopy = [...props.merchantsData];
 
-      merchantsDataCopy.map((data, index) => {
+      merchantsDataCopy.forEach((data, index) => {
         data.bids = maxBidsArr[index];
       });
 
@@ -212,7 +213,7 @@ const MerchantsTable = (props) => {
       setSwitchLabel('MIN');
       let merchantsDataCopy = [...props.merchantsData];
 
-      merchantsDataCopy.map((data, index) => {
+      merchantsDataCopy.forEach((data, index) => {
         data.bids = minBidsArr[index];
       });
 
@@ -234,7 +235,7 @@ const MerchantsTable = (props) => {
 
     let merchantsDataCopy = [...merchantsData];
 
-    merchantsDataCopy.map((data, index) => {
+    merchantsDataCopy.forEach((data, index) => {
       data.bids = maxBidArray[index];
     });
 

@@ -42,3 +42,7 @@ export const createMaxAndMinBidArrays = (arr, arrOfMaxBidId) => {
 
   return {'maxBidArray': maxBidArray, 'minBidArray': minBidArray};
 }
+
+export const currencySymbol = (currency) => {
+  return currency === 'INR' ? '₹' : '$';
+}

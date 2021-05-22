@@ -14,6 +14,7 @@ const LoaderErrorComponent = (props) => {
             src={'./doubleRingLoader.gif'}
             width="56px"
             height="56px"
+            alt="Loading..."
           />
         </Box>
       }
